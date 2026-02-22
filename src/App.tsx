@@ -45,6 +45,15 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [generationCount, setGenerationCount] = useState<number>(0);
+
+  // Fetch initial count from backend
+  React.useEffect(() => {
+    fetch('/api/usage')
+      .then(res => res.json())
+      .then(data => setGenerationCount(data.count))
+      .catch(err => console.error('Failed to fetch usage:', err));
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -52,6 +61,11 @@ export default function App() {
   };
 
   const handleGenerate = async () => {
+    if (generationCount >= 3) {
+      setError('You have reached the limit of 3 banner generations.');
+      return;
+    }
+
     setIsGenerating(true);
     setError(null);
     
@@ -68,10 +82,20 @@ export default function App() {
     High-end, enterprise consultant branding, cinematic lighting.`;
 
     try {
+      // 1. Check/Increment limit on backend first
+      const usageRes = await fetch('/api/usage/increment', { method: 'POST' });
+      if (!usageRes.ok) {
+        const errData = await usageRes.json();
+        throw new Error(errData.error || 'Failed to update usage limit');
+      }
+      const usageData = await usageRes.json();
+      setGenerationCount(usageData.count);
+
+      // 2. Generate image
       const imageUrl = await generateBannerImage(prompt);
       setGeneratedImage(imageUrl);
-    } catch (err) {
-      setError('Failed to generate banner. Please try again.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate banner. Please try again.');
       console.error(err);
     } finally {
       setIsGenerating(false);
@@ -216,20 +240,25 @@ export default function App() {
 
           <button
             onClick={handleGenerate}
-            disabled={isGenerating}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-semibold py-4 rounded-2xl shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+            disabled={isGenerating || generationCount >= 3}
+            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-semibold py-4 rounded-2xl shadow-lg shadow-indigo-600/20 flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98]"
           >
-            {isGenerating ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5" />
-                Generate Banner
-              </>
-            )}
+            <div className="flex items-center gap-2">
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5" />
+                  {generationCount >= 3 ? 'Limit Reached' : 'Generate Banner'}
+                </>
+              )}
+            </div>
+            <span className="text-[10px] opacity-60 uppercase tracking-widest font-bold">
+              {generationCount} / 3 used
+            </span>
           </button>
           
           {error && (
