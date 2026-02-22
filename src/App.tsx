@@ -50,9 +50,20 @@ export default function App() {
   // Fetch initial count from backend
   React.useEffect(() => {
     fetch('/api/usage')
-      .then(res => res.json())
+      .then(async res => {
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Not a JSON response");
+        }
+        return res.json();
+      })
       .then(data => setGenerationCount(data.count))
-      .catch(err => console.error('Failed to fetch usage:', err));
+      .catch(err => {
+        console.error('Failed to fetch usage:', err);
+        // Fallback to 0 if backend is missing (e.g. static deployment)
+        setGenerationCount(0);
+      });
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -84,12 +95,20 @@ export default function App() {
     try {
       // 1. Check/Increment limit on backend first
       const usageRes = await fetch('/api/usage/increment', { method: 'POST' });
-      if (!usageRes.ok) {
-        const errData = await usageRes.json();
-        throw new Error(errData.error || 'Failed to update usage limit');
+      
+      if (usageRes.ok) {
+        const usageData = await usageRes.json();
+        setGenerationCount(usageData.count);
+      } else {
+        // If backend is missing or erroring, we might still want to allow generation 
+        // in a "demo" mode or show a specific error.
+        const contentType = usageRes.headers.get("content-type");
+        if (usageRes.status === 403 && contentType?.includes("application/json")) {
+          const errData = await usageRes.json();
+          throw new Error(errData.error || 'Limit reached');
+        }
+        console.warn('Backend usage API failed, proceeding anyway in demo mode');
       }
-      const usageData = await usageRes.json();
-      setGenerationCount(usageData.count);
 
       // 2. Generate image
       const imageUrl = await generateBannerImage(prompt);
