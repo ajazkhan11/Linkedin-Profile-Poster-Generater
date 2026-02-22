@@ -1,5 +1,4 @@
 <div align="center">
-![Uploading image.png…]()
 
 
 
