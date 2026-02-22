@@ -21,7 +21,6 @@ interface BannerData {
   title: string;
   tagline: string;
   email: string;
-  phone: string;
   style: string;
 }
 
@@ -30,15 +29,22 @@ const STYLES = [
   { id: 'minimal', name: 'Minimalist Corporate', description: 'Clean white/gray, professional typography, subtle textures.' },
   { id: 'creative', name: 'Creative Modern', description: 'Vibrant gradients, abstract shapes, bold and energetic.' },
   { id: 'luxury', name: 'Dark Luxury', description: 'Black and gold, elegant lines, premium feel.' },
+  { id: 'nature', name: 'Organic & Calm', description: 'Soft greens, natural textures, serene landscapes, eco-friendly.' },
+  { id: 'geometric', name: 'Bold Geometric', description: 'Sharp angles, high contrast colors, mathematical precision.' },
+  { id: 'retro', name: 'Vintage Aesthetic', description: 'Muted tones, grain textures, 80s/90s professional vibe.' },
+  { id: 'neon', name: 'Cyberpunk Neon', description: 'Electric blues and pinks, dark backgrounds, high energy.' },
+  { id: 'mesh', name: 'Gradient Mesh', description: 'Soft, flowing color transitions, modern and sophisticated.' },
+  { id: 'architect', name: 'Architectural', description: 'Structured lines, blueprint aesthetic, professional and solid.' },
+  { id: 'minimal_dark', name: 'Sleek Dark', description: 'Monochromatic dark tones, ultra-minimalist, high-end tech.' },
+  { id: 'abstract', name: 'Abstract Art', description: 'Fluid shapes, artistic expression, unique and memorable.' },
 ];
 
 export default function App() {
   const [data, setData] = useState<BannerData>({
-    name: 'Muhammad Ijaz',
-    title: 'Full-Stack Developer | Generative AI & AI Agents',
-    tagline: 'Helping Businesses Automate & Scale',
-    email: 'ajazk5574@gmail.com',
-    phone: '+92 3495731779',
+    name: '',
+    title: '',
+    tagline: '',
+    email: '',
     style: 'tech',
   });
 
@@ -88,7 +94,7 @@ export default function App() {
     Main title in bold premium font: '${data.name}'. 
     Subtitle: '${data.title}'. 
     Tagline: '${data.tagline}'. 
-    In a sleek contact box at the bottom right, list: 'WhatsApp: ${data.phone}' and 'Email: ${data.email}'. 
+    In a sleek contact box at the bottom right, list: 'Contact: ${data.email}'. 
     The left 30% of the image is empty to accommodate the profile picture. 
     High-end, enterprise consultant branding, cinematic lighting.`;
 
@@ -148,98 +154,147 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Controls Panel */}
-        <div className="lg:col-span-4 space-y-6">
-          <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl">
-            <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
-              <Layout className="w-5 h-5 text-indigo-400" />
-              Banner Details
-            </h2>
+      <main className="flex-1 max-w-5xl mx-auto w-full p-4 md:p-8 space-y-8">
+        {/* Banner Preview Area - The "Main Screen" */}
+        <div className="space-y-6">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col min-h-[300px]">
+            <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
+                <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
+                <span className="ml-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">LinkedIn Canvas</span>
+              </div>
+              
+              {generatedImage && (
+                <button 
+                  onClick={downloadImage}
+                  className="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-bold transition-colors"
+                >
+                  <Download className="w-3 h-3" />
+                  Download
+                </button>
+              )}
+            </div>
+
+            <div className="relative aspect-[1584/396] bg-zinc-950 flex items-center justify-center overflow-hidden">
+              <AnimatePresence mode="wait">
+                {isGenerating ? (
+                  <motion.div 
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col items-center gap-3"
+                  >
+                    <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                    <span className="text-xs font-medium text-zinc-400">AI is painting...</span>
+                  </motion.div>
+                ) : generatedImage ? (
+                  <motion.img 
+                    key="result"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    src={generatedImage} 
+                    alt="Generated Banner" 
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="text-center p-8">
+                    <ImageIcon className="w-12 h-12 text-zinc-800 mx-auto mb-3" />
+                    <p className="text-sm text-zinc-600">Your masterpiece will appear here</p>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Central Action Button */}
+          <div className="flex flex-col items-center gap-4">
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating || generationCount >= 3}
+              className="group relative px-12 py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-bold rounded-2xl shadow-2xl shadow-indigo-600/40 transition-all active:scale-95 overflow-hidden"
+            >
+              <div className="relative z-10 flex items-center gap-3">
+                {isGenerating ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                )}
+                <span className="text-lg">
+                  {generationCount >= 3 ? 'Limit Reached' : 'Generate My Banner'}
+                </span>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+            </button>
             
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5">Full Name</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                  <input 
-                    type="text" 
-                    name="name"
-                    value={data.name}
-                    onChange={handleInputChange}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                    placeholder="e.g. John Doe"
-                  />
-                </div>
-              </div>
+            <div className="flex items-center gap-2 px-4 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full">
+              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+                {3 - generationCount} Generations Remaining
+              </span>
+            </div>
+            
+            {error && (
+              <p className="text-red-400 text-xs font-medium bg-red-400/10 px-4 py-2 rounded-lg border border-red-400/20">
+                {error}
+              </p>
+            )}
+          </div>
+        </div>
 
-              <div>
-                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5">Professional Title</label>
-                <div className="relative">
-                  <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                  <input 
-                    type="text" 
-                    name="title"
-                    value={data.title}
-                    onChange={handleInputChange}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                    placeholder="e.g. Senior Software Engineer"
-                  />
-                </div>
+        {/* Simplified Input Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-zinc-900">
+          <div className="space-y-6">
+            <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+              <User className="w-4 h-4" />
+              Identity
+            </h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-zinc-600 uppercase ml-1">Full Name</label>
+                <input 
+                  type="text" 
+                  name="name"
+                  value={data.name}
+                  onChange={handleInputChange}
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:border-indigo-500 outline-none transition-all"
+                  placeholder="e.g. Alex Rivera"
+                />
               </div>
-
-              <div>
-                <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5">Tagline / Value Prop</label>
-                <div className="relative">
-                  <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                  <input 
-                    type="text" 
-                    name="tagline"
-                    value={data.tagline}
-                    onChange={handleInputChange}
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                    placeholder="e.g. Building the future of web"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-zinc-600 uppercase ml-1">Headline</label>
+                <input 
+                  type="text" 
+                  name="title"
+                  value={data.title}
+                  onChange={handleInputChange}
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:border-indigo-500 outline-none transition-all"
+                  placeholder="e.g. Product Designer @ TechCo"
+                />
               </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                    <input 
-                      type="email" 
-                      name="email"
-                      value={data.email}
-                      onChange={handleInputChange}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5">Phone / WhatsApp</label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                    <input 
-                      type="text" 
-                      name="phone"
-                      value={data.phone}
-                      onChange={handleInputChange}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                    />
-                  </div>
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-zinc-600 uppercase ml-1">Contact (Email/Web)</label>
+                <input 
+                  type="text" 
+                  name="email"
+                  value={data.email}
+                  onChange={handleInputChange}
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:border-indigo-500 outline-none transition-all"
+                  placeholder="e.g. hello@alex.design"
+                />
               </div>
             </div>
-          </section>
+          </div>
 
-          <section className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <ImageIcon className="w-5 h-5 text-indigo-400" />
-              Visual Style
-            </h2>
-            <div className="grid grid-cols-1 gap-2">
+          <div className="space-y-6">
+            <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+              <ImageIcon className="w-4 h-4" />
+              Aesthetic
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
               {STYLES.map((style) => (
                 <button
                   key={style.id}
@@ -247,178 +302,13 @@ export default function App() {
                   className={`text-left p-3 rounded-xl border transition-all ${
                     data.style === style.id 
                       ? 'bg-indigo-600/10 border-indigo-500 ring-1 ring-indigo-500' 
-                      : 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'
+                      : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
                   }`}
                 >
-                  <div className="font-medium text-sm">{style.name}</div>
-                  <div className="text-xs text-zinc-500 mt-0.5">{style.description}</div>
+                  <div className="font-bold text-xs">{style.name}</div>
+                  <div className="text-[10px] text-zinc-500 mt-1 line-clamp-1">{style.description}</div>
                 </button>
               ))}
-            </div>
-          </section>
-
-          <button
-            onClick={handleGenerate}
-            disabled={isGenerating || generationCount >= 3}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-semibold py-4 rounded-2xl shadow-lg shadow-indigo-600/20 flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98]"
-          >
-            <div className="flex items-center gap-2">
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5" />
-                  {generationCount >= 3 ? 'Limit Reached' : 'Generate Banner'}
-                </>
-              )}
-            </div>
-            <span className="text-[10px] opacity-60 uppercase tracking-widest font-bold">
-              {generationCount} / 3 used
-            </span>
-          </button>
-          
-          {error && (
-            <p className="text-red-400 text-xs text-center">{error}</p>
-          )}
-        </div>
-
-        {/* Preview Panel */}
-        <div className="lg:col-span-8 space-y-6">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col min-h-[400px]">
-            <div className="p-6 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
-                <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
-                <span className="ml-2 text-xs font-medium text-zinc-500 uppercase tracking-widest">Live Preview</span>
-              </div>
-              
-              {generatedImage && (
-                <button 
-                  onClick={downloadImage}
-                  className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-sm font-medium transition-colors"
-                >
-                  <Download className="w-4 h-4" />
-                  Download PNG
-                </button>
-              )}
-            </div>
-
-            <div className="flex-1 relative flex items-center justify-center p-8 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-800/50 via-zinc-900 to-zinc-950">
-              <AnimatePresence mode="wait">
-                {isGenerating ? (
-                  <motion.div 
-                    key="loading"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 1.1 }}
-                    className="flex flex-col items-center gap-4 text-center"
-                  >
-                    <div className="relative">
-                      <div className="w-20 h-20 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
-                      <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-indigo-400 animate-pulse" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold">Crafting your brand...</h3>
-                      <p className="text-sm text-zinc-500 max-w-xs mx-auto mt-2">
-                        Gemini is designing a professional banner based on your profile and style.
-                      </p>
-                    </div>
-                  </motion.div>
-                ) : generatedImage ? (
-                  <motion.div 
-                    key="result"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full space-y-6"
-                  >
-                    <div className="relative group rounded-2xl overflow-hidden border border-zinc-700 shadow-2xl aspect-[1584/396] bg-zinc-800">
-                      <img 
-                        src={generatedImage} 
-                        alt="Generated LinkedIn Banner" 
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                         <button 
-                          onClick={downloadImage}
-                          className="bg-white text-black px-6 py-3 rounded-full font-bold flex items-center gap-2 shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all"
-                         >
-                           <Download className="w-5 h-5" />
-                           Save Banner
-                         </button>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="p-2 bg-indigo-500 rounded-lg">
-                          <Sparkles className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-indigo-300">AI Design Complete</h4>
-                          <p className="text-sm text-zinc-400 mt-1">
-                            Your banner has been generated with a 1584x396 aspect ratio, optimized for LinkedIn. 
-                            The left side is kept clear for your profile picture.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div 
-                    key="empty"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-center space-y-4"
-                  >
-                    <div className="w-24 h-24 bg-zinc-800 rounded-3xl flex items-center justify-center mx-auto border border-zinc-700 border-dashed">
-                      <ImageIcon className="w-10 h-10 text-zinc-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-semibold text-zinc-300">Ready to design?</h3>
-                      <p className="text-sm text-zinc-500 max-w-sm mx-auto mt-2">
-                        Fill in your professional details and click generate to see your custom AI-powered LinkedIn banner.
-                      </p>
-                    </div>
-                    <button 
-                      onClick={handleGenerate}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-xl text-sm font-medium transition-all"
-                    >
-                      Quick Start with Sample Data
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Tips Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-              <h4 className="font-semibold mb-3 flex items-center gap-2">
-                <Layout className="w-4 h-4 text-indigo-400" />
-                LinkedIn Best Practices
-              </h4>
-              <ul className="text-sm text-zinc-500 space-y-2">
-                <li>• Keep the left 30% clear for your profile photo.</li>
-                <li>• Use high-contrast text for readability.</li>
-                <li>• Include clear contact information.</li>
-                <li>• Align your banner with your industry's vibe.</li>
-              </ul>
-            </div>
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-              <h4 className="font-semibold mb-3 flex items-center gap-2 text-indigo-400">
-                <RefreshCw className="w-4 h-4" />
-                Iterative Design
-              </h4>
-              <p className="text-sm text-zinc-500">
-                Not happy with the first result? Try changing the style or tweaking your title. AI generation produces unique results every time.
-              </p>
             </div>
           </div>
         </div>
