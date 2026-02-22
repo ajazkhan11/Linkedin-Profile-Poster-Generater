@@ -6,7 +6,7 @@
 
 This contains everything you need to run your app locally.
 
-View your app in AI Studio: https://ai.studio/apps/47f913fa-dab5-4ef5-9ed3-a69f918ef5ee
+View the app here: https://fanciful-linked-ok-be3873.netlify.app/
 
 ## Run Locally
 
