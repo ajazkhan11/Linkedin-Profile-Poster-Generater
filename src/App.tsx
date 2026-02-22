@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Sparkles, 
+  Zap, 
   Download, 
   RefreshCw, 
   User, 
@@ -144,12 +144,9 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+              <Zap className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-xl font-bold tracking-tight">Pro Banner AI</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-zinc-500 hidden sm:inline-block">Powered by Gemini 2.5 Flash</span>
           </div>
         </div>
       </header>
@@ -266,7 +263,7 @@ export default function App() {
                   {isGenerating ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
-                    <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                    <Zap className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                   )}
                   <span className="text-lg">
                     {generationCount >= 3 ? 'Limit Reached' : 'Generate My Banner'}
