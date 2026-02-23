@@ -241,9 +241,20 @@ export default function App() {
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                <div className="text-center p-8">
-                  <ImageIcon className="w-12 h-12 text-zinc-800 mx-auto mb-3" />
-                  <p className="text-sm text-zinc-600">Your masterpiece will appear here</p>
+                <div className="relative w-full h-full group">
+                  <img 
+                    src="/preview.png" 
+                    alt="Sample Banner" 
+                    className="w-full h-full object-cover opacity-20 grayscale group-hover:opacity-40 group-hover:grayscale-0 transition-all duration-700"
+                    onError={(e) => {
+                      // Fallback if preview.png is not found
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1584&h=396&auto=format&fit=crop';
+                    }}
+                  />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <ImageIcon className="w-12 h-12 text-zinc-800 mb-3" />
+                    <p className="text-sm text-zinc-600 font-medium tracking-wide">Your masterpiece will appear here</p>
+                  </div>
                 </div>
               )}
             </AnimatePresence>
