@@ -58,6 +58,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [generationCount, setGenerationCount] = useState<number>(0);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState<string | null>(null);
 
   // Fetch initial count from backend
   React.useEffect(() => {
@@ -147,6 +148,28 @@ export default function App() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleCheckout = async (plan: string) => {
+    setIsCheckingOut(plan);
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      });
+      const { url, error } = await response.json();
+      if (error) throw new Error(error);
+      
+      // Modern transition before redirect
+      setTimeout(() => {
+        window.location.href = url;
+      }, 800);
+    } catch (err: any) {
+      console.error("Checkout error:", err);
+      setError(err.message || "Failed to start checkout");
+      setIsCheckingOut(null);
+    }
   };
 
   return (
@@ -400,8 +423,26 @@ export default function App() {
                         No watermarks
                       </li>
                     </ul>
-                    <button className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-bold transition-all">
-                      Get Started
+                    <button 
+                      onClick={() => handleCheckout('daily')}
+                      disabled={!!isCheckingOut}
+                      className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-bold transition-all relative overflow-hidden"
+                    >
+                      <motion.div
+                        animate={isCheckingOut === 'daily' ? { y: -40, opacity: 0 } : { y: 0, opacity: 1 }}
+                        className="flex items-center justify-center gap-2"
+                      >
+                        Get Started
+                      </motion.div>
+                      {isCheckingOut === 'daily' && (
+                        <motion.div
+                          initial={{ y: 40, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          className="absolute inset-0 flex items-center justify-center bg-indigo-600"
+                        >
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        </motion.div>
+                      )}
                     </button>
                   </div>
 
@@ -431,8 +472,26 @@ export default function App() {
                         Commercial usage rights
                       </li>
                     </ul>
-                    <button className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/20">
-                      Subscribe Now
+                    <button 
+                      onClick={() => handleCheckout('monthly')}
+                      disabled={!!isCheckingOut}
+                      className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/20 relative overflow-hidden"
+                    >
+                      <motion.div
+                        animate={isCheckingOut === 'monthly' ? { y: -40, opacity: 0 } : { y: 0, opacity: 1 }}
+                        className="flex items-center justify-center gap-2"
+                      >
+                        Subscribe Now
+                      </motion.div>
+                      {isCheckingOut === 'monthly' && (
+                        <motion.div
+                          initial={{ y: 40, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          className="absolute inset-0 flex items-center justify-center bg-white text-indigo-600"
+                        >
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        </motion.div>
+                      )}
                     </button>
                   </div>
 
@@ -462,8 +521,26 @@ export default function App() {
                         Dedicated support
                       </li>
                     </ul>
-                    <button className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-bold transition-all">
-                      Go Elite
+                    <button 
+                      onClick={() => handleCheckout('yearly')}
+                      disabled={!!isCheckingOut}
+                      className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-bold transition-all relative overflow-hidden"
+                    >
+                      <motion.div
+                        animate={isCheckingOut === 'yearly' ? { y: -40, opacity: 0 } : { y: 0, opacity: 1 }}
+                        className="flex items-center justify-center gap-2"
+                      >
+                        Go Elite
+                      </motion.div>
+                      {isCheckingOut === 'yearly' && (
+                        <motion.div
+                          initial={{ y: 40, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          className="absolute inset-0 flex items-center justify-center bg-indigo-600"
+                        >
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        </motion.div>
+                      )}
                     </button>
                   </div>
                 </div>
