@@ -22,6 +22,7 @@ interface BannerData {
   tagline: string;
   email: string;
   style: string;
+  customPrompt: string;
 }
 
 const STYLES = [
@@ -46,6 +47,7 @@ export default function App() {
     tagline: '',
     email: '',
     style: 'tech',
+    customPrompt: '',
   });
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -90,6 +92,7 @@ export default function App() {
     
     const prompt = `A professional LinkedIn banner, size 1584x396. 
     Style: ${selectedStyle?.description}
+    ${data.customPrompt ? `Additional instructions: ${data.customPrompt}` : ''}
     The text is on the right side. 
     Main title in bold premium font: '${data.name}'. 
     Subtitle: '${data.title}'. 
@@ -249,6 +252,17 @@ export default function App() {
                     placeholder="e.g. hello@alex.design"
                   />
                 </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-zinc-600 uppercase ml-1">Custom Banner Description (Optional)</label>
+                  <textarea 
+                    name="customPrompt"
+                    value={data.customPrompt}
+                    onChange={handleInputChange}
+                    rows={3}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm focus:border-indigo-500 outline-none transition-all resize-none"
+                    placeholder="e.g. Add some subtle circuit patterns in the background or use a specific color palette..."
+                  />
+                </div>
               </div>
             </div>
 
@@ -298,10 +312,10 @@ export default function App() {
                 <button
                   key={style.id}
                   onClick={() => setData(prev => ({ ...prev, style: style.id }))}
-                  className={`text-left p-4 rounded-xl border transition-all ${
+                  className={`text-left p-4 rounded-xl border transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/5 ${
                     data.style === style.id 
-                      ? 'bg-indigo-600/10 border-indigo-500 ring-1 ring-indigo-500' 
-                      : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+                      ? 'bg-indigo-600/10 border-indigo-500 ring-1 ring-indigo-500 shadow-lg shadow-indigo-500/10' 
+                      : 'bg-zinc-900 border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800/50'
                   }`}
                 >
                   <div className="font-bold text-xs">{style.name}</div>
