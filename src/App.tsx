@@ -12,6 +12,9 @@ import {
   Layout,
   ChevronRight,
   Loader2,
+  Check,
+  CreditCard,
+  X,
   Image as ImageIcon
 } from 'lucide-react';
 import { generateBannerImage } from './lib/gemini';
@@ -54,6 +57,7 @@ export default function App() {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [generationCount, setGenerationCount] = useState<number>(0);
+  const [showPricingModal, setShowPricingModal] = useState(false);
 
   // Fetch initial count from backend
   React.useEffect(() => {
@@ -81,6 +85,7 @@ export default function App() {
 
   const handleGenerate = async () => {
     if (generationCount >= 3) {
+      setShowPricingModal(true);
       setError('You have reached the limit of 3 banner generations.');
       return;
     }
@@ -123,7 +128,11 @@ export default function App() {
       const imageUrl = await generateBannerImage(prompt);
       setGeneratedImage(imageUrl);
     } catch (err: any) {
-      setError(err.message || 'Failed to generate banner. Please try again.');
+      const errorMessage = err.message || 'Failed to generate banner. Please try again.';
+      setError(errorMessage);
+      if (errorMessage.toLowerCase().includes('limit reached')) {
+        setShowPricingModal(true);
+      }
       console.error(err);
     } finally {
       setIsGenerating(false);
@@ -150,6 +159,15 @@ export default function App() {
               <Zap className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-xl font-bold tracking-tight">Pro Banner AI</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setShowPricingModal(true)}
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/30 rounded-xl text-xs font-bold text-indigo-400 transition-all"
+            >
+              <CreditCard className="w-3.5 h-3.5" />
+              Go Pro
+            </button>
           </div>
         </div>
       </header>
@@ -270,7 +288,7 @@ export default function App() {
             <div className="flex flex-col items-start gap-4">
               <button
                 onClick={handleGenerate}
-                disabled={isGenerating || generationCount >= 3}
+                disabled={isGenerating}
                 className="group relative w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-bold rounded-2xl shadow-2xl shadow-indigo-600/40 transition-all active:scale-[0.98] overflow-hidden"
               >
                 <div className="relative z-10 flex items-center justify-center gap-3">
@@ -280,7 +298,7 @@ export default function App() {
                     <Zap className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                   )}
                   <span className="text-lg">
-                    {generationCount >= 3 ? 'Limit Reached' : 'Generate My Banner'}
+                    {generationCount >= 3 ? 'Upgrade to Generate' : 'Generate My Banner'}
                   </span>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
@@ -326,6 +344,134 @@ export default function App() {
           </div>
         </div>
       </main>
+
+      <AnimatePresence>
+        {showPricingModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPricingModal(false)}
+              className="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-5xl bg-zinc-900 border border-zinc-800 rounded-[2.5rem] shadow-2xl overflow-hidden"
+            >
+              <button 
+                onClick={() => setShowPricingModal(false)}
+                className="absolute top-6 right-6 p-2 hover:bg-zinc-800 rounded-full transition-colors z-10"
+              >
+                <X className="w-6 h-6 text-zinc-500" />
+              </button>
+
+              <div className="p-8 md:p-12 space-y-12 max-h-[90vh] overflow-y-auto">
+                <div className="text-center space-y-4">
+                  <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Unlimited Professional Banners</h2>
+                  <p className="text-zinc-500 max-w-2xl mx-auto">
+                    Upgrade to a premium plan to remove generation limits, access exclusive styles, and download high-resolution assets.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {/* Daily Plan */}
+                  <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 space-y-6 flex flex-col hover:border-zinc-700 transition-all">
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-bold">Daily Pass</h3>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold">$7.99</span>
+                        <span className="text-zinc-500 text-sm">/day</span>
+                      </div>
+                    </div>
+                    <ul className="space-y-3 flex-1">
+                      <li className="flex items-center gap-3 text-sm text-zinc-400">
+                        <Check className="w-4 h-4 text-green-500" />
+                        Unlimited generations (24h)
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-zinc-400">
+                        <Check className="w-4 h-4 text-green-500" />
+                        All premium styles
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-zinc-400">
+                        <Check className="w-4 h-4 text-green-500" />
+                        No watermarks
+                      </li>
+                    </ul>
+                    <button className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-bold transition-all">
+                      Get Started
+                    </button>
+                  </div>
+
+                  {/* Monthly Plan */}
+                  <div className="bg-indigo-600/5 border-2 border-indigo-500 rounded-3xl p-8 space-y-6 flex flex-col relative overflow-hidden shadow-2xl shadow-indigo-500/10">
+                    <div className="absolute top-4 right-4 bg-indigo-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest">
+                      Popular
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-bold">Monthly Pro</h3>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold">$19.99</span>
+                        <span className="text-zinc-500 text-sm">/mo</span>
+                      </div>
+                    </div>
+                    <ul className="space-y-3 flex-1">
+                      <li className="flex items-center gap-3 text-sm text-zinc-300">
+                        <Check className="w-4 h-4 text-indigo-500" />
+                        Unlimited generations
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-zinc-300">
+                        <Check className="w-4 h-4 text-indigo-500" />
+                        Priority AI processing
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-zinc-300">
+                        <Check className="w-4 h-4 text-indigo-500" />
+                        Commercial usage rights
+                      </li>
+                    </ul>
+                    <button className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/20">
+                      Subscribe Now
+                    </button>
+                  </div>
+
+                  {/* Yearly Plan */}
+                  <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 space-y-6 flex flex-col hover:border-zinc-700 transition-all">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-bold">Yearly Elite</h3>
+                        <span className="text-[10px] font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded-full">SAVE 40%</span>
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold">$299.99</span>
+                        <span className="text-zinc-500 text-sm">/yr</span>
+                      </div>
+                    </div>
+                    <ul className="space-y-3 flex-1">
+                      <li className="flex items-center gap-3 text-sm text-zinc-400">
+                        <Check className="w-4 h-4 text-green-500" />
+                        Everything in Monthly
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-zinc-400">
+                        <Check className="w-4 h-4 text-green-500" />
+                        Early access to new features
+                      </li>
+                      <li className="flex items-center gap-3 text-sm text-zinc-400">
+                        <Check className="w-4 h-4 text-green-500" />
+                        Dedicated support
+                      </li>
+                    </ul>
+                    <button className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-bold transition-all">
+                      Go Elite
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <footer className="border-t border-zinc-800 py-8 mt-12 bg-zinc-950">
         <div className="max-w-7xl mx-auto px-4 text-center">
